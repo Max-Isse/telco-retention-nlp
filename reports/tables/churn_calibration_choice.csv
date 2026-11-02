@@ -1,0 +1,7 @@
+model,method,oof_brier_cross_fitted
+logistic,none,0.13162907802694987
+logistic,sigmoid,0.13167180154304858
+logistic,isotonic,0.13208203464781376
+lightgbm,none,0.12982374447693187
+lightgbm,sigmoid,0.12966057929525762
+lightgbm,isotonic,0.12994612693058477

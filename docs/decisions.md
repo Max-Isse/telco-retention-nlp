@@ -38,3 +38,35 @@ CLTV is a value estimate made by the company, used on the value side of the expe
 ## D-006 One uv environment, no Docker for the analysis
 **Choice:** the whole project runs in a uv-managed `.venv` (`uv sync`, `uv run telco <step>`); Docker appears only
 for the API image in phase 7. **Why:** no JVM or Spark is needed; one environment keeps runs fast and reproducible.
+
+## D-007 Validation without a time dimension: stratified holdout, stratified CV, bootstrap CIs
+**Choice:** a stratified 20% holdout (1,409 customers) scored once; stratified 5-fold CV on the remaining 5,634 for
+every choice (calibration method, model used for targeting); 2,000-resample bootstrap CIs on holdout metrics, and a
+paired bootstrap for the LightGBM − logistic difference. Segment results use the cross-validated predictions of the
+training part (more customers per segment than the holdout).
+**Why:** Telco is one snapshot with no dates, so out-of-time testing is impossible (stated in the report); survival
+analysis on tenure (phase 3) is the substitute for the time dimension.
+
+## D-008 One design matrix; add-on services as flags; total charges left out
+**Choice:** add-on services become 0/1 flags (their "No internet service" level duplicates `internet_service = No`),
+multi-level categoricals are one-hot with a reference level (month-to-month, DSL, electronic check), and
+`total_charges` is excluded (≈ tenure × monthly charges). Both models use the same 22 columns.
+**Consequence:** the service flags explain almost all of the variance of monthly charges, so the logistic model cannot
+separate the effect of price from the services bought; individual odds ratios for fibre and streaming have wide
+intervals, while their joint effect and the predictions are stable.
+
+## D-009 Models: baselines, logistic regression, LightGBM with fixed settings
+**Choice:** base rate and a rules baseline (month-to-month and tenure ≤ 12, as a probability learned on training
+rows); logistic regression (L2, C = 1, for scoring; unpenalised statsmodels fit for odds ratios and CIs); LightGBM
+with fixed, conservative settings (300 trees, 15 leaves, at least 40 rows per leaf). No hyperparameter search: on
+5.6k rows the gain would be small and need nested CV to report honestly.
+
+## D-010 Calibration chosen by cross-fitted Brier; the targeting model chosen by cross-validated Brier
+**Choice:** for each model, `none`, Platt (`sigmoid`) and `isotonic` are compared by Brier score on out-of-fold
+predictions calibrated by the other folds; the best is refitted on all OOF predictions. The model saved for targeting
+is the one with the lowest cross-validated Brier score (LightGBM, by 0.002). Targeting multiplies probabilities by
+value at risk, so calibration matters more than ranking.
+**Result:** both models were already well calibrated (logistic: no recalibration; LightGBM: Platt, Brier change
+< 0.001), and LightGBM and logistic regression are statistically indistinguishable on the holdout (ROC-AUC difference
++0.004, 95% CI −0.004 to +0.012). The logistic model remains the explanation of record: SHAP directions agree on all
+22 features and importance ranks correlate at 0.91.

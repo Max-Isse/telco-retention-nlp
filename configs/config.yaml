@@ -10,6 +10,7 @@ paths:
   reports_dir: reports
   tables_dir: reports/tables
   figures_dir: reports/figures
+  artifacts_dir: artifacts           # trained models (git-ignored)
 
 telco:
   # IBM's official copy of the Telco Customer Churn sample (7,043 customers, 21 columns), on IBM's GitHub.
@@ -34,6 +35,25 @@ leakage:
 
 eda:
   tenure_bands: [0, 6, 12, 24, 48, 72]  # months; bands (0,6], (6,12], ... used for segments in later phases too
+
+models:
+  # Phase 2 (D-007 to D-010). Telco has no time dimension: stratified holdout + stratified CV, bootstrap CIs.
+  holdout_share: 0.20               # stratified final holdout, scored once
+  cv_folds: 5                       # stratified CV on the training part (out-of-fold predictions)
+  bootstrap: 2000                   # resamples for holdout CIs
+  rules_max_tenure: 12              # rules baseline: month-to-month and tenure <= 12 months
+  calibration_methods: [none, sigmoid, isotonic]  # chosen by out-of-fold Brier score on the training part
+  logistic:
+    C: 1.0                          # mild L2 for the sklearn model used in scoring; inference uses unpenalised statsmodels
+  lightgbm:                         # fixed, conservative settings for 5.6k training rows (no search; D-009)
+    n_estimators: 300
+    learning_rate: 0.03
+    num_leaves: 15
+    min_child_samples: 40
+    subsample: 0.8
+    subsample_freq: 1
+    colsample_bytree: 0.8
+    reg_lambda: 1.0
 
 business:
   # ---- ASSUMPTIONS (no treatment or cost data come with Telco) ----

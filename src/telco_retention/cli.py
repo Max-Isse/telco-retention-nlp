@@ -56,7 +56,18 @@ def cmd_eda(cfg: Config) -> None:
     log.info("eda report %s", write_eda(df, cfg, layout))
 
 
-STEPS = ["fetch", "data", "eda"]
+def cmd_train(cfg: Config) -> None:
+    from telco_retention.models.report import evaluate_all, save_model, write_report
+    from telco_retention.models.train import train_all
+
+    customers = pd.read_parquet(cfg.path("processed_dir") / "customers.parquet")
+    res = train_all(customers, cfg)
+    ev = evaluate_all(res, cfg)
+    path = save_model(res, ev, cfg)
+    log.info("churn models: chosen %s; report %s", ev["chosen"], write_report(res, ev, cfg, path))
+
+
+STEPS = ["fetch", "data", "eda", "train"]
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -71,6 +82,7 @@ def main(argv: list[str] | None = None) -> None:
         "fetch": lambda: cmd_fetch(cfg, args.force),
         "data": lambda: cmd_data(cfg),
         "eda": lambda: cmd_eda(cfg),
+        "train": lambda: cmd_train(cfg),
     }
     for name in STEPS if args.step == "all" else [args.step]:
         steps[name]()

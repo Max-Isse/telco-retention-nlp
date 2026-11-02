@@ -8,7 +8,7 @@ until the API image.
 |---|---|---|---|
 | 0 | Repo, uv venv, standards, business case, phase plan, decisions | this file, `docs/`, `configs/config.yaml`, CI | done |
 | 1 | IBM Telco download (checksum pinned), cleaning, pandera contract, leakage audit (test), decision-focused EDA, lineage | `data/`, `eda.py`, `reports/eda.md`, D-002–D-005 | done |
-| 2 | Churn models: base rate and rules baselines, logistic regression (odds ratios, CIs), LightGBM; stratified CV + holdout, bootstrap CIs; calibration (recalibrate if needed); segments by contract, tenure, service; SHAP vs coefficients | `models/`, `reports/churn_models.md` | |
+| 2 | Churn models: base rate and rules baselines, logistic regression (odds ratios, CIs), LightGBM; stratified CV + holdout, bootstrap CIs; calibration (recalibrate if needed); segments by contract, tenure, service; SHAP vs coefficients | `models/`, `reports/churn_models.md`, methodology §1–2, D-007–D-010 | done |
 | 3 | Survival: Kaplan–Meier by contract, Cox PH on tenure, PH assumption checks, hazard ratios; expected remaining lifetime for CLV | `survival/`, `reports/survival.md` | |
 | 4 | Retention targeting: value at risk (CLTV or CLV estimate), expected value per customer, policies at a fixed budget (random, top probability, top EV, rules), profit curves, sensitivity; randomised uplift test design (sample size, holdout) | `targeting/`, `reports/targeting.md` | |
 | 5 | Support text: Twitter dataset filtered to telecom brands (filter and volumes documented), cleaning, threading customer tweet → brand reply; theme discovery with sentence embeddings + BERTopic or clustering, labelled and validated by reading samples | `nlp/`, `reports/themes.md` | |

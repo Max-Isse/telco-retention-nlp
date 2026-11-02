@@ -6,7 +6,7 @@ Customer-retention analytics on two public data sets that are deliberately **not
 - **Customer Support on Twitter** (telecom brands): which complaint themes drive dissatisfaction, connected to churn
   drivers at the level of themes and service types (D-001).
 
-**Status:** phases 0–1 of 8 complete (data, leakage audit, EDA). See [docs/phase_plan.md](docs/phase_plan.md).
+**Status:** phases 0–2 of 8 complete (data, leakage audit, EDA, churn models). See [docs/phase_plan.md](docs/phase_plan.md).
 
 ## How to run
 
@@ -26,15 +26,16 @@ uv run pytest
 
 - `fetch` downloads IBM's file and checks its pinned SHA-256 (the extended IBM sample comes from Kaggle; see
   [data/README.md](data/README.md)); `data` cleans it, enforces the data contract, audits
-  leakage and writes `data/processed/customers.parquet`; `eda` writes [reports/eda.md](reports/eda.md).
+  leakage and writes `data/processed/customers.parquet`; `eda` writes [reports/eda.md](reports/eda.md); `train` fits the baselines, logistic regression and LightGBM
+  and writes [reports/churn_models.md](reports/churn_models.md).
 - Every path, seed and business assumption is in [configs/config.yaml](configs/config.yaml).
 
 ## Layout
 
 | Path | Contents |
 |---|---|
-| `src/telco_retention/` | `data/` (fetch, clean, contract, leakage audit), `eda.py`, `cli.py` |
+| `src/telco_retention/` | `data/` (fetch, clean, contract, leakage audit), `eda.py`, `models/` (design, training, evaluation, SHAP), `cli.py` |
 | `configs/` | config and assumptions |
-| `docs/` | standards, business case, phase plan, decisions, lineage |
+| `docs/` | standards, business case, methodology, phase plan, decisions, lineage |
 | `reports/` | generated reports, tables and figures |
 | `tests/` | pytest on small fixtures (no network) |
