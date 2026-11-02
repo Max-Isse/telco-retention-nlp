@@ -8,6 +8,7 @@ authors = [
 ]
 requires-python = ">=3.11"
 dependencies = [
+    "lifelines>=0.30",
     "lightgbm>=4.6",
     "matplotlib>=3.10",
     "numba>=0.61",

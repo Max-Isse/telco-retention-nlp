@@ -1,0 +1,6 @@
+quantity,value
+monthly hazard at tenure 1 (snapshot reading: churners / customers with tenure 1),0.6199021207177814
+"P(reach 48 months), snapshot reading",8.549316766848718e-08
+"P(reach 48 months), cohort reading",0.7088401843460741
+observed share of customers with tenure >= 49 months,0.31790430214397275
+"churn rate in the data (one month, if the snapshot reading held)",0.2653698707936959

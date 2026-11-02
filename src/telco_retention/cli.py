@@ -67,7 +67,16 @@ def cmd_train(cfg: Config) -> None:
     log.info("churn models: chosen %s; report %s", ev["chosen"], write_report(res, ev, cfg, path))
 
 
-STEPS = ["fetch", "data", "eda", "train"]
+def cmd_survival(cfg: Config) -> None:
+    from telco_retention.data.load import features
+    from telco_retention.survival import run_survival, write_survival_report
+
+    customers = pd.read_parquet(cfg.path("processed_dir") / "customers.parquet")
+    res = run_survival(customers, features(customers, cfg), cfg)
+    log.info("survival report %s", write_survival_report(res, cfg))
+
+
+STEPS = ["fetch", "data", "eda", "train", "survival"]
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -83,6 +92,7 @@ def main(argv: list[str] | None = None) -> None:
         "data": lambda: cmd_data(cfg),
         "eda": lambda: cmd_eda(cfg),
         "train": lambda: cmd_train(cfg),
+        "survival": lambda: cmd_survival(cfg),
     }
     for name in STEPS if args.step == "all" else [args.step]:
         steps[name]()

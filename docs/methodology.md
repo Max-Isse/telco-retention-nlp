@@ -1,12 +1,14 @@
 # Methodology
 
-Sections 1–2 cover the churn data and models (phases 1–2). Survival, targeting and NLP follow in later phases.
-Results: [reports/eda.md](../reports/eda.md), [reports/churn_models.md](../reports/churn_models.md).
+Sections 1–2 cover the churn data and models (phases 1–2), section 3 survival (phase 3). Targeting and NLP follow.
+Results: [reports/eda.md](../reports/eda.md), [reports/churn_models.md](../reports/churn_models.md),
+[reports/survival.md](../reports/survival.md).
 
 ## 1. Data and unit of analysis
 
 - **Data:** IBM's extended Telco sample (7,043 fictional customers, one snapshot each), verified against IBM's
-  official file (D-002). The outcome is `churn` (left within the last month); the base rate is 26.5%.
+  official file (D-002). The outcome is `churn` (IBM: "left within the last month"; treated as churn at the recorded tenure, D-011); the
+  base rate is 26.5%.
 - **Unit:** one customer. There is no time dimension, so no out-of-time test is possible; tenure (months with the
   company) carries the time information and is used for survival analysis in phase 3.
 - **Leakage:** churn reason, score, label, value and status exist only after the outcome; they are excluded by name and
@@ -33,3 +35,21 @@ Results: [reports/eda.md](../reports/eda.md), [reports/churn_models.md](../repor
 - **Where it can fail:** IBM's customers are fictional and the snapshot cannot show seasonality or campaign effects;
   probabilities are calibrated to this base rate and need recalibration if the churn rate shifts; segment PR-AUC is
   low where churn is rare (two-year contracts, 2.8%), so rankings there carry little information.
+
+## 3. Survival on tenure
+
+- **Reading of the data (D-011):** IBM's literal description (churn in the last month) would make this a
+  left-truncated snapshot; that reading implies a 62% monthly hazard at tenure 1 and almost no customer reaching four
+  years, contradicting the 32% with 49+ months. The cohort reading (churners observed at their tenure at churn, stayers
+  censored) is coherent and used. Assumption: censoring is independent of churn risk given covariates.
+- **Kaplan-Meier by contract:** 72-month survival 13% (month-to-month), 57% (one year), 94% (two year); log-rank test
+  rejects equality decisively.
+- **Cox proportional hazards (D-012):** hazard ratios at the same tenure (two-year contract 0.08, one-year 0.24, having
+  dependents 0.37, no internet 0.39, fibre 1.36). Assumption checked with Schoenfeld residuals: 11 of 21 covariates
+  violate proportionality, so their ratios are tenure averages; a model stratified by contract removes the assumption
+  for the strongest violator.
+- **Remaining lifetime (D-013):** expected months within 24, conditional on tenure, from contract-specific monthly
+  hazards; used as a cross-check on CLTV and for the fallback CLV.
+- **Where it can fail:** stationarity of hazards across cohorts is assumed; extrapolation beyond 72 months; the sample is
+  fictional and its churn rate is far above real monthly churn, so absolute survival is illustrative.
+

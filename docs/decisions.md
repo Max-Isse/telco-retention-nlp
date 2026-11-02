@@ -70,3 +70,25 @@ value at risk, so calibration matters more than ranking.
 < 0.001), and LightGBM and logistic regression are statistically indistinguishable on the holdout (ROC-AUC difference
 +0.004, 95% CI −0.004 to +0.012). The logistic model remains the explanation of record: SHAP directions agree on all
 22 features and importance ranks correlate at 0.91.
+
+## D-011 Survival: the cohort reading of the churn flag, after testing IBM's literal wording
+**Choice:** churners are treated as observed at the tenure at which they left and stayers as censored at their current
+tenure (standard right-censored survival on tenure).
+**Why:** IBM describes the flag as "left within the last month". Read literally (a monthly snapshot, each customer at
+risk only in their last month, left-truncated), the monthly hazard at tenure 1 would be 62% and the probability of
+reaching 48 months essentially 0, while 31.8% of customers have 49+ months of tenure and a 26.5% one-month churn rate
+is far beyond any real telco. The literal reading is inconsistent with the data; the check is computed in
+`survival.consistency_check` and reported. The sample is fictional, so absolute survival describes this sample only.
+
+## D-012 Cox model: average hazard ratios plus a model stratified by contract
+**Choice:** report the Cox model on all covariates and a model stratified by contract (own baseline hazard per
+contract), with a Schoenfeld-residual test against rank of time for every covariate.
+**Why:** 11 of 21 covariates violate proportional hazards, including the one-year contract; their hazard ratios are
+tenure-averaged effects. Stratifying removes the assumption for contract, the largest violator among strong effects.
+Time-varying coefficients for every covariate would fit better but be harder to use; the churn models (phase 2)
+already capture non-linear tenure effects for scoring.
+
+## D-013 Remaining lifetime from the contract-specific monthly hazard, conditional on tenure
+**Choice:** expected months still a customer within the 24-month horizon, from the discrete monthly hazard of the
+customer's contract at their current tenure; beyond 72 months, each contract's pooled hazard over its last 12 months.
+**Use:** a cross-check on IBM's CLTV and the basis of the fallback CLV estimate in phase 4.
