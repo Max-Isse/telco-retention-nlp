@@ -1,0 +1,21 @@
+churn_reason,churners,share
+Attitude of support person,192,0.10272873194221509
+Competitor offered higher download speeds,189,0.10112359550561797
+Competitor offered more data,162,0.08667736757624397
+Don't know,154,0.08239700374531835
+Competitor made better offer,140,0.0749063670411985
+Attitude of service provider,135,0.07223113964686999
+Competitor had better devices,130,0.06955591225254147
+Network reliability,103,0.05510968432316747
+Product dissatisfaction,102,0.05457463884430177
+Price too high,98,0.052434456928838954
+Service dissatisfaction,89,0.047619047619047616
+Lack of self-service on Website,88,0.047084002140181914
+Extra data charges,57,0.030497592295345103
+Moved,53,0.02835741037988229
+Lack of affordable download/upload speed,44,0.023542001070090957
+Limited range of services,44,0.023542001070090957
+Long distance charges,44,0.023542001070090957
+Poor expertise of phone support,20,0.010700909577314071
+Poor expertise of online support,19,0.010165864098448368
+Deceased,6,0.0032102728731942215

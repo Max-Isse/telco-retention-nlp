@@ -1,0 +1,5 @@
+step,rows,note
+read (extended),7043,33 columns
+total_charges blank -> 0 where tenure = 0,7043,11 blank; 11 with tenure 0 set to 0
+drop duplicate customer_id,7043,0 removed
+contract passed; saved processed table,7043,customers.parquet

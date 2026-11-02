@@ -1,0 +1,47 @@
+# Single source of truth for paths, seeds, data sources, leakage rules and business assumptions.
+# Values marked ASSUMPTION are not estimated from data; they are varied in sensitivity analysis (phase 4).
+
+seed: 20261102
+
+paths:
+  raw_dir: data/raw
+  processed_dir: data/processed
+  manifest: data/raw_manifest.json   # committed: source URLs, SHA-256, row counts
+  reports_dir: reports
+  tables_dir: reports/tables
+  figures_dir: reports/figures
+
+telco:
+  # IBM's official copy of the Telco Customer Churn sample (7,043 customers, 21 columns), on IBM's GitHub.
+  # The extended IBM version (CLTV, Churn Reason/Score/Category) is distributed only behind logins (Kaggle,
+  # IBM Community); the loader accepts it too if placed in data/raw/ as `telco_extended.xlsx` (D-002).
+  url: https://raw.githubusercontent.com/IBM/telco-customer-churn-on-icp4d/master/data/Telco-Customer-Churn.csv
+  sha256: 16320c9c1ec72448db59aa0a26a0b95401046bef5d02fd3aeb906448e3055e91  # pinned (data/raw_manifest.json)
+  file: Telco-Customer-Churn.csv
+  extended_file: telco_extended.xlsx
+  # Kaggle dataset yeanzc/telco-customer-churn-ibm-dataset (Telco_customer_churn.xlsx, IBM's extended sample),
+  # checked against IBM's file: same 7,043 ids, identical shared fields except Dependents for 551 customers (D-002)
+  extended_source: kaggle datasets download yeanzc/telco-customer-churn-ibm-dataset -f Telco_customer_churn.xlsx
+  extended_sha256: 1bcbc0ccc9b352175216979102628e579cfbde2c3ff57b005de168a433122640
+  id: customer_id
+  target: churn
+  expected_rows: 7043
+
+leakage:
+  # Fields that exist only because the outcome is known (or are derived from it). They are dropped by the loader and a
+  # test asserts they never reach the feature set (D-003).
+  forbidden_features: [churn_reason, churn_score, churn_category, churn_label, churn_value, customer_status]
+
+eda:
+  tenure_bands: [0, 6, 12, 24, 48, 72]  # months; bands (0,6], (6,12], ... used for segments in later phases too
+
+business:
+  # ---- ASSUMPTIONS (no treatment or cost data come with Telco) ----
+  offer_cost: 50.0                   # ASSUMPTION: cost of one retention offer (currency units)
+  contact_cost: 2.0                  # ASSUMPTION: cost of contacting one customer (agent time, channel)
+  save_rate: 0.30                    # ASSUMPTION: P(stays | would churn, receives offer)
+  backfire_rate: 0.02                # ASSUMPTION: P(churns because contacted | would have stayed)
+  clv_horizon_months: 24             # ASSUMPTION: horizon for value at risk when CLTV is not available
+  monthly_margin: 0.30               # ASSUMPTION: margin on monthly charges
+  annual_discount_rate: 0.10         # ASSUMPTION
+  budget_contacts: 500               # ASSUMPTION: customers the team can contact per campaign

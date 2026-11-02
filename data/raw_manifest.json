@@ -1,0 +1,14 @@
+{
+  "telco": {
+    "source": "https://raw.githubusercontent.com/IBM/telco-customer-churn-on-icp4d/master/data/Telco-Customer-Churn.csv",
+    "file": "Telco-Customer-Churn.csv",
+    "sha256": "16320c9c1ec72448db59aa0a26a0b95401046bef5d02fd3aeb906448e3055e91",
+    "rows": 7043
+  },
+  "telco_extended": {
+    "source": "kaggle datasets download yeanzc/telco-customer-churn-ibm-dataset -f Telco_customer_churn.xlsx",
+    "file": "telco_extended.xlsx",
+    "sha256": "1bcbc0ccc9b352175216979102628e579cfbde2c3ff57b005de168a433122640",
+    "rows": 7043
+  }
+}
