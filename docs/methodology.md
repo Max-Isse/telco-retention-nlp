@@ -1,8 +1,9 @@
 # Methodology
 
-Sections 1–2 cover the churn data and models (phases 1–2), section 3 survival (phase 3). Targeting and NLP follow.
+Sections 1–2 cover the churn data and models (phases 1–2), section 3 survival (phase 3), section 4 targeting
+(phase 4). NLP follows.
 Results: [reports/eda.md](../reports/eda.md), [reports/churn_models.md](../reports/churn_models.md),
-[reports/survival.md](../reports/survival.md).
+[reports/survival.md](../reports/survival.md), [reports/targeting.md](../reports/targeting.md).
 
 ## 1. Data and unit of analysis
 
@@ -52,4 +53,20 @@ Results: [reports/eda.md](../reports/eda.md), [reports/churn_models.md](../repor
   hazards; used as a cross-check on CLTV and for the fallback CLV.
 - **Where it can fail:** stationarity of hazards across cohorts is assumed; extrapolation beyond 72 months; the sample is
   fictional and its churn rate is far above real monthly churn, so absolute survival is illustrative.
+
+## 4. Retention targeting
+
+- **Probabilities (D-014):** calibrated out-of-fold predictions for every customer; the targeted group's predicted churn
+  (74.0%) matches its actual churn (76.0%).
+- **Expected value (D-015):** EV = p·V·s − offer − contact − (1 − p)·b·V, with value at risk from IBM's CLTV or a
+  transparent CLV estimate (margin × charges × expected remaining life, discounted).
+- **Policies (D-016):** random, rules, top churn probability and top expected value at a fixed budget, ranked on
+  predictions and scored on outcomes with bootstrap CIs; profit curves and one-at-a-time sensitivity.
+- **Assumptions:** save rate, offer and contact cost, backfire rate and budget are assumptions (no treatment data); a
+  constant save rate across customers is the strongest one, since uplift varies by customer.
+- **Uplift (D-017):** true uplift needs randomisation: a treatment/control split of the customers the policy would
+  contact, sized with a two-proportion power calculation, plus a permanent holdout and an uplift model afterwards.
+- **Where it can fail:** if the save rate is low or concentrated in customers who would not churn anyway, ranking by EV
+  overstates profit; CLTV's formula is unknown; offers may also change the behaviour of stayers (backfire), which is
+  only assumed here.
 

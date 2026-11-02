@@ -76,7 +76,20 @@ def cmd_survival(cfg: Config) -> None:
     log.info("survival report %s", write_survival_report(res, cfg))
 
 
-STEPS = ["fetch", "data", "eda", "train", "survival"]
+def cmd_target(cfg: Config) -> None:
+    import joblib
+
+    from telco_retention.targeting import run_targeting, write_targeting_report
+
+    customers = pd.read_parquet(cfg.path("processed_dir") / "customers.parquet")
+    remaining = pd.read_parquet(cfg.path("processed_dir") / "expected_remaining_months.parquet")
+    months = customers[["customer_id"]].merge(remaining, on="customer_id")["expected_remaining_months"].to_numpy()
+    bundle = joblib.load(cfg.path("artifacts_dir") / "churn_model.joblib")
+    res = run_targeting(customers, months, bundle, cfg)
+    log.info("targeting report %s", write_targeting_report(res, cfg))
+
+
+STEPS = ["fetch", "data", "eda", "train", "survival", "target"]
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -93,6 +106,7 @@ def main(argv: list[str] | None = None) -> None:
         "eda": lambda: cmd_eda(cfg),
         "train": lambda: cmd_train(cfg),
         "survival": lambda: cmd_survival(cfg),
+        "target": lambda: cmd_target(cfg),
     }
     for name in STEPS if args.step == "all" else [args.step]:
         steps[name]()

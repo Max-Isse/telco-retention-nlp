@@ -92,3 +92,29 @@ already capture non-linear tenure effects for scoring.
 **Choice:** expected months still a customer within the 24-month horizon, from the discrete monthly hazard of the
 customer's contract at their current tenure; beyond 72 months, each contract's pooled hazard over its last 12 months.
 **Use:** a cross-check on IBM's CLTV and the basis of the fallback CLV estimate in phase 4.
+
+## D-014 Out-of-fold probabilities for every customer drive targeting
+**Choice:** targeting uses calibrated, out-of-fold churn probabilities for all 7,043 customers (the phase 2 model type
+and calibration rule, refitted per fold), so policies are compared on customers no model saw in training.
+**Why:** in-sample probabilities would overstate how well any policy finds churners. Predicted churn among the top-EV
+customers (74.0%) matches their actual churn rate (76.0%).
+
+## D-015 Expected value formula and value at risk
+**Choice:** EV = p·V·s − offer cost − contact cost − (1 − p)·b·V (the brief's formula, with the backfire cost of
+contacting a stayer). V is IBM's CLTV (primary). The alternative V is a transparent CLV estimate: margin × monthly
+charges × expected remaining months (phase 3), discounted. Both are run.
+**Why / caveat:** CLTV is supplied by IBM from an undisclosed formula, correlates only 0.09 with the CLV estimate and is
+about ten times larger; it changes the scale of profit and partly who is targeted. Top-EV targeting wins under both.
+
+## D-016 Policies ranked on predictions, scored on outcomes
+**Choice:** each policy orders customers (random; rules: flagged customers first in random order; top probability;
+top EV) and is scored on actual churn, with the save and backfire rates applied in expectation; 95% bootstrap CIs
+resample customers and keep each policy's ranking.
+**Why:** scoring on outcomes rewards a policy that actually finds churners and value, not one that only believes it does.
+
+## D-017 Messages from SHAP drivers; uplift needs a randomised test
+**Choice:** each targeted customer's message comes from their top positive SHAP drivers through ordered rules in
+config (contract upgrade, first-year welcome, fibre check, security bundle, auto-pay credit, price review). The save
+rate is an assumption; the report sizes a randomised treatment/control test (two-proportion z-test) and recommends a
+permanent holdout and an uplift model once test data exist.
+**Why:** without treatment data, uplift cannot be estimated; offer–driver matching is a hypothesis to test, not a result.

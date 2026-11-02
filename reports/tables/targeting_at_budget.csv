@@ -1,0 +1,5 @@
+policy,contacted,churners_reached,precision,value_at_risk_reached,expected_profit,profit_ci_low,profit_ci_high
+random,500,136,0.272,561310.0,109980.3,79595.39099999999,134161.35
+"rules (month-to-month, tenure <= 12)",500,253,0.506,1033414.0,263995.19999999995,237502.7005,297730.188
+top churn probability,500,415,0.83,1644478.0,460858.89999999997,435152.3025,485501.68549999996
+top expected value,500,380,0.76,1925679.0,539147.92,503268.04,572213.3325

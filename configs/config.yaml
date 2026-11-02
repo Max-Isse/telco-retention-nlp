@@ -65,3 +65,29 @@ business:
   monthly_margin: 0.30               # ASSUMPTION: margin on monthly charges
   annual_discount_rate: 0.10         # ASSUMPTION
   budget_contacts: 500               # ASSUMPTION: customers the team can contact per campaign
+
+targeting:
+  # Phase 4 (D-014 to D-017). Probabilities: out-of-fold for every customer (no customer scored by a model that saw it).
+  value_source: cltv                # cltv (IBM's CLTV, primary) | clv_estimate (monthly charges x margin x remaining life)
+  bootstrap: 1000                   # resamples for CIs on profit at the budget
+  sensitivity:
+    save_rate: [0.10, 0.20, 0.30, 0.40, 0.50]
+    offer_cost: [25.0, 50.0, 100.0, 200.0]
+    backfire_rate: [0.0, 0.02, 0.05]
+    value_source: [cltv, clv_estimate]
+  # message chosen from the customer's top churn drivers (SHAP), first matching rule wins; ASSUMPTION: offer types
+  messages:
+    - {driver: "contract=", action: "Offer a discounted 12-month contract"}
+    - {driver: "tenure", action: "Welcome call and first-year loyalty credit"}
+    - {driver: "internet_service=fiber_optic", action: "Fibre service check and speed guarantee"}
+    - {driver: "online_security", action: "Free online security and tech support for 3 months"}
+    - {driver: "tech_support", action: "Free online security and tech support for 3 months"}
+    - {driver: "payment_method=", action: "Bill credit for switching to automatic payment"}
+    - {driver: "paperless_billing", action: "Bill credit for switching to automatic payment"}
+    - {driver: "monthly_charges", action: "Price review: plan right-sizing"}
+  default_message: "General retention offer"
+  uplift_test:
+    alpha: 0.05
+    power: 0.80
+    save_rates: [0.05, 0.10, 0.20, 0.30]  # true relative reduction in churn among treated to detect
+
