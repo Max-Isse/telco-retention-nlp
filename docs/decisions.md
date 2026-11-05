@@ -173,3 +173,39 @@ the tweet share, the churn-reason share and IBM's churn rate with and without a 
 **Why:** the datasets share no customer key (D-001); a driver-level comparison is the honest link.
 **Caveat:** shares are not comparable as rates: tweets over-represent acute, visible failures; churn reasons are what a
 leaving customer picked from a list.
+
+## D-023 Batch scoring: the deployed model scores the active customers; contact list by expected value
+**Choice:** `telco score` scores the active customers (churn = 0, 5,174), or a file in IBM's columns (`--input`), with
+the phase 2 bundle (LightGBM, sigmoid calibration), values them with IBM's CLTV (else margin on monthly charges over
+`clv_horizon_months`), and lists the highest expected values, positive only, up to the budget, with each customer's
+top SHAP drivers (with their values: `no contract=two_year`, `tenure 1`) and the matching message. The list and a run
+manifest (input hash, model, assumptions, score distribution) go to `outputs/` (git-ignored); a summary to
+`reports/scoring.md`.
+**Why:** this is the policy phase 4 found best (top expected value) applied the way a team would run it.
+**Caveat:** the sample is one snapshot, so the active customers are also training customers and their probabilities
+are in-sample. The evaluated performance is phase 4's, on out-of-fold probabilities; in production the model is
+trained on last period's outcomes and scores this period's active base.
+**Result:** 2,326 active customers have positive expected value; the 500 on the list have mean churn probability 0.56
+(0.17 for all active customers) and an expected value of about 340k under the phase 4 assumptions.
+
+## D-024 Served ticket classifiers are TF-IDF, not embeddings
+**Choice:** the API serves TF-IDF + logistic regression for theme, sentiment and urgency, refitted on all 1,000 labels
+(`telco package-tickets`), not the phase 6 embeddings models.
+**Why:** embeddings need torch and the sentence-transformer at serving time (an image several times larger, slower
+start-up, CUDA wheels by default on Linux). The cost is measured (`reports/ticket_serving.md`, out of time, LLM
+labels): urgency gives up almost nothing (macro-F1 0.71 vs 0.73), themes give up 0.14 (0.44 vs 0.58), sentiment 0.11
+(0.50 vs 0.61; 0.35 against the hand labels, with positive tweets almost absent from the training labels).
+**Consequence:** use the served sentiment only as a rough flag; the embeddings image (CPU torch) is the upgrade if
+theme or sentiment accuracy matters (Phase 8 limitations).
+
+## D-025 Deployment: one FastAPI image without models baked in; weekly scheduled scoring in GitHub Actions
+**Choice:** `api.py` (`/health`, `/churn/score` with input validation in IBM's vocabulary, `/tickets/classify`); the
+image installs the core dependencies non-editable, runs as a non-root user, and reads models from a read-only mounted
+`artifacts/` (a missing model gives 503 on its endpoint and "degraded" on /health). CI builds the image and smoke-tests
+it. `score.yml` runs weekly (and on demand): fetch the pinned data, clean, train, score, and upload the contact list as
+a 14-day workflow artifact; the Kaggle extended sample is used when the `KAGGLE_API_TOKEN` secret is set.
+**Why:** models change more often than code, so they are mounted, not rebuilt into the image; retraining in the
+scheduled job keeps the model in step with the pinned data at no storage cost.
+**Caveat:** in a public repository, workflow artifacts are visible to signed-in GitHub users; IBM's data is a public
+fictional sample, but a real contact list would go to private storage.
+

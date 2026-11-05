@@ -8,6 +8,7 @@ authors = [
 ]
 requires-python = ">=3.11"
 dependencies = [
+    "fastapi>=0.115",
     "lifelines>=0.30",
     "lightgbm>=4.6",
     "matplotlib>=3.10",
@@ -22,6 +23,7 @@ dependencies = [
     "shap>=0.47",
     "statsmodels>=0.14",
     "tabulate>=0.9",
+    "uvicorn>=0.32",
 ]
 
 [project.optional-dependencies]
@@ -37,6 +39,7 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "httpx>=0.28",
     "mypy>=2.4.1",
     "pandas-stubs>=3.1.0.261029",
     "pytest>=9.2.0",

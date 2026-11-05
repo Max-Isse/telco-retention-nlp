@@ -22,3 +22,18 @@ jobs:
           uv run mypy src
       - name: Test (small fixtures, no network)
         run: uv run pytest
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build the serving image
+        run: docker build -t telco-retention .
+      - name: Smoke test (no models mounted, so /health reports degraded)
+        run: |
+          docker run -d --name api -p 8000:8000 telco-retention
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:8000/health && break; sleep 2; done
+          curl -sf http://127.0.0.1:8000/health | grep -q '"status":"degraded"'
+          test "$(curl -s -o /dev/null -w '%{http_code}' -X POST http://127.0.0.1:8000/tickets/classify \
+            -H 'Content-Type: application/json' -d '{"texts":["internet down"]}')" = 503
+          docker logs api

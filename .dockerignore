@@ -1,0 +1,12 @@
+.venv/
+.git/
+data/
+artifacts/
+outputs/
+reports/
+tests/
+docs/
+**/__pycache__/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/

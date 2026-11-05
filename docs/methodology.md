@@ -104,3 +104,16 @@ Results: [reports/eda.md](../reports/eda.md), [reports/churn_models.md](../repor
 - **Where it can fail:** LLM labels may share the LLM's blind spots (hence the human sample); small classes have wide
   per-class uncertainty; sarcasm and understatement remain hard for both the trained and the off-the-shelf models.
 
+## 7. Scoring and deployment
+
+- **Batch scoring (D-023):** the deployed churn model (phase 2 bundle) scores the active customers; expected value as
+  in phase 4; the contact list takes the highest positive expected values up to the budget, with SHAP drivers and a
+  message per customer. Probabilities on the snapshot's active customers are in-sample (training rows); the policy's
+  evaluated performance is phase 4's.
+- **Served text models (D-024):** TF-IDF + logistic regression, scored out of time before refitting on all labels;
+  the gap to the embeddings models is reported.
+- **Service (D-025):** FastAPI with pydantic validation of every field against IBM's values; models loaded once at
+  start-up from a mounted directory; a scheduled workflow retrains and scores weekly.
+- **Where it can fail:** inputs outside the training range (very long tenure, new contract types) are rejected or
+  extrapolated by the trees; the served sentiment model misses praise (few positive training labels).
+

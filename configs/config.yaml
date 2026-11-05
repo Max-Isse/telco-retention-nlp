@@ -11,6 +11,7 @@ paths:
   tables_dir: reports/tables
   figures_dir: reports/figures
   artifacts_dir: artifacts           # trained models (git-ignored)
+  outputs_dir: outputs               # batch scoring: contact list and run manifest (git-ignored)
 
 telco:
   # IBM's official copy of the Telco Customer Churn sample (7,043 customers, 21 columns), on IBM's GitHub.

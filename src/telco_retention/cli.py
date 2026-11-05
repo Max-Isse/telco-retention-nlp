@@ -6,6 +6,7 @@ import argparse
 import json
 import logging
 from collections.abc import Callable
+from pathlib import Path
 
 import pandas as pd
 
@@ -153,7 +154,43 @@ def cmd_classify(cfg: Config) -> None:
     log.info("classifiers: best %s; reports %s", res.meta["best_theme_model"], [str(p) for p in paths])
 
 
-STEPS = ["fetch", "data", "eda", "train", "survival", "target", "themes", "classify"]
+def cmd_score(cfg: Config, input_path: str | None) -> None:
+    """Score the active customers (or a file of customers in IBM's columns) and write the ranked contact list."""
+    from telco_retention.scoring import load_bundle, prepare, run_batch, write_outputs
+
+    if input_path:
+        path = Path(input_path)
+        raw = pd.read_csv(path, dtype=str, keep_default_na=False) if path.suffix == ".csv" else pd.read_parquet(path)
+        customers, source = prepare(raw), path.name
+    else:
+        all_customers = pd.read_parquet(cfg.path("processed_dir") / "customers.parquet")
+        customers, source = (
+            all_customers[all_customers.churn == 0].reset_index(drop=True),
+            "active customers (churn = 0)",
+        )
+    run = run_batch(customers, load_bundle(cfg), cfg, source)
+    log.info("scored %s customers, %s on the list; %s", len(customers), len(run.contacts), write_outputs(run, cfg))
+
+
+def cmd_package_tickets(cfg: Config) -> None:
+    """Evaluate and save the servable (TF-IDF) ticket classifiers."""
+    import joblib
+
+    from telco_retention.nlp.tickets import fit_ticket_models, write_ticket_report
+
+    tweets = pd.read_parquet(cfg.path("processed_dir") / "telecom_tweets.parquet")
+    labels_dir = cfg.path("raw_dir").parent / "labels"
+    df = pd.read_csv(labels_dir / "llm_labels.csv").merge(tweets[["tweet_id", "clean"]], on="tweet_id")
+    human_path = labels_dir / "human_labels.csv"
+    human = pd.read_csv(human_path) if human_path.exists() else None
+    bundle, scores = fit_ticket_models(df, cfg, human)
+    path = cfg.path("artifacts_dir") / "ticket_models.joblib"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    joblib.dump(bundle, path)
+    log.info("ticket models %s; report %s", path, write_ticket_report(scores, cfg))
+
+
+STEPS = ["fetch", "data", "eda", "train", "survival", "target", "score", "themes", "classify", "package-tickets"]
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -161,6 +198,7 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("step", choices=[*STEPS, "all", "import-labels"])
     parser.add_argument("--config", default=None)
     parser.add_argument("--force", action="store_true", help="fetch: download again")
+    parser.add_argument("--input", default=None, help="score: CSV/Parquet of customers in IBM's columns")
     args = parser.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
     cfg = load_config(args.config)
@@ -173,6 +211,8 @@ def main(argv: list[str] | None = None) -> None:
         "target": lambda: cmd_target(cfg),
         "themes": lambda: cmd_themes(cfg),
         "classify": lambda: cmd_classify(cfg),
+        "score": lambda: cmd_score(cfg, args.input),
+        "package-tickets": lambda: cmd_package_tickets(cfg),
         "import-labels": lambda: cmd_import_labels(cfg),
     }
     for name in STEPS if args.step == "all" else [args.step]:

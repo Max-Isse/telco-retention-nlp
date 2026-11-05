@@ -1,0 +1,45 @@
+name: scheduled-scoring
+
+# Weekly batch run (D-025): fetch the pinned data, retrain, score the active customers, publish the contact list as a
+# workflow artifact. The IBM extended sample (CLTV) needs a Kaggle token in the KAGGLE_API_TOKEN secret; without it the
+# run uses IBM's basic file and values customers on charges x margin x horizon.
+on:
+  schedule:
+    - cron: "0 6 * * 1" # Mondays 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  score:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      KAGGLE_API_TOKEN: ${{ secrets.KAGGLE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.3.3
+        with:
+          python-version: "3.11"
+      - name: Install (locked)
+        run: uv sync --locked
+      - name: IBM extended sample (optional, Kaggle)
+        if: env.KAGGLE_API_TOKEN != ''
+        run: |
+          mkdir -p data/raw/kaggle
+          uvx --from "kaggle>=1.8" kaggle datasets download yeanzc/telco-customer-churn-ibm-dataset -p data/raw/kaggle --unzip
+          mv "$(find data/raw/kaggle -name '*.xlsx' | head -1)" data/raw/telco_extended.xlsx
+      - name: Fetch, clean, train, score
+        run: |
+          uv run telco fetch
+          uv run telco data
+          uv run telco train
+          uv run telco score
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: contact-list-${{ github.run_id }}
+          path: |
+            outputs/
+            reports/scoring.md
+          retention-days: 14

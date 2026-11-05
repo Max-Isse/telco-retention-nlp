@@ -8,6 +8,7 @@ data/raw/
 data/interim/
 data/processed/
 artifacts/
+outputs/
 mlruns/
 desktop.ini
 Thumbs.db
