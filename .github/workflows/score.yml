@@ -28,7 +28,7 @@ jobs:
         if: env.KAGGLE_API_TOKEN != ''
         run: |
           mkdir -p data/raw/kaggle
-          uvx --from "kaggle>=1.8" kaggle datasets download yeanzc/telco-customer-churn-ibm-dataset -p data/raw/kaggle --unzip
+          uvx --from "kaggle>=1.8" --with six kaggle datasets download yeanzc/telco-customer-churn-ibm-dataset -p data/raw/kaggle --unzip
           mv "$(find data/raw/kaggle -name '*.xlsx' | head -1)" data/raw/telco_extended.xlsx
       - name: Fetch, clean, train, score
         run: |
