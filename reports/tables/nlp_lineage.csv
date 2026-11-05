@@ -1,0 +1,7 @@
+step,rows
+all tweets in the dataset,2811774
+replies by the configured telecom brands,147639
+customer tweets answered by a telecom brand,139707
+opening tweets (not replies to anything),85819
+at least 4 words after cleaning,83351
+duplicate texts removed,83138

@@ -17,3 +17,18 @@ Kaggle: IBM extended sample, telco_extended.xlsx (pinned) ─┘
 | contract passed; processed table saved | 7,043 | churn rate 26.5% | D-003 |
 
 Generated each run: `reports/tables/lineage.csv` and `reports/tables/leakage_audit.csv`.
+
+## Support tweets (`telco themes`)
+
+| Step | Rows | Decision |
+|---|---|---|
+| all tweets in the dataset | 2,811,774 | |
+| replies by the 8 US telecom brands | 147,639 | D-018 |
+| customer tweets answered by those brands | 139,707 | |
+| opening tweets (not replies) | 85,819 | |
+| at least 4 words after cleaning | 83,351 | |
+| duplicate texts removed | 83,138 | |
+| themes assigned (20 clusters → 13 themes) | 83,138 | D-019 |
+
+Generated each run: `reports/tables/nlp_lineage.csv`.
+

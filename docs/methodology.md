@@ -1,9 +1,9 @@
 # Methodology
 
 Sections 1–2 cover the churn data and models (phases 1–2), section 3 survival (phase 3), section 4 targeting
-(phase 4). NLP follows.
+(phase 4), section 5 support-text themes (phase 5).
 Results: [reports/eda.md](../reports/eda.md), [reports/churn_models.md](../reports/churn_models.md),
-[reports/survival.md](../reports/survival.md), [reports/targeting.md](../reports/targeting.md).
+[reports/survival.md](../reports/survival.md), [reports/targeting.md](../reports/targeting.md), [reports/themes.md](../reports/themes.md).
 
 ## 1. Data and unit of analysis
 
@@ -69,4 +69,18 @@ Results: [reports/eda.md](../reports/eda.md), [reports/churn_models.md](../repor
 - **Where it can fail:** if the save rate is low or concentrated in customers who would not churn anyway, ranking by EV
   overstates profit; CLTV's formula is unknown; offers may also change the behaviour of stayers (backfire), which is
   only assumed here.
+
+## 5. Support-text themes
+
+- **Data (D-018):** real public tweets to support accounts; 83,138 opening customer tweets answered by 8 US telecom
+  brands, cleaned and de-duplicated, almost all from October to early December 2017. Not linked to IBM's customers
+  (D-001).
+- **Method (D-019):** sentence embeddings (all-MiniLM-L6-v2) clustered with k-means into 20 clusters, described by
+  class-based TF-IDF terms, then merged into 13 themes by reading central and random tweets per cluster.
+- **Assumptions and checks:** embeddings capture topic rather than tone; clusters are interpretable. The silhouette is
+  flat (0.026–0.029) for every k tried, so the number of clusters is a reading choice, not a statistical one; the theme
+  labels are tested against a hand-labelled sample in phase 6.
+- **Where it can fail:** a large share (23%) is generic venting with no service named; event-driven themes (the iPhone X
+  launch) are specific to the time window; Twitter users are not a random sample of customers, so theme volumes show
+  what is said publicly, not the true mix of problems.
 

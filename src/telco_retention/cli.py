@@ -89,7 +89,18 @@ def cmd_target(cfg: Config) -> None:
     log.info("targeting report %s", write_targeting_report(res, cfg))
 
 
-STEPS = ["fetch", "data", "eda", "train", "survival", "target"]
+def cmd_themes(cfg: Config) -> None:
+    from telco_retention.nlp.data import load_raw, save, telecom_threads
+    from telco_retention.nlp.report import write_themes_report
+    from telco_retention.nlp.themes import run_themes
+
+    res = telecom_threads(load_raw(cfg), cfg)
+    save(res.tweets, cfg)
+    th = run_themes(res.tweets, cfg)
+    log.info("themes: k=%s; report %s", th["k"], write_themes_report(res.tweets, res.steps, th, cfg))
+
+
+STEPS = ["fetch", "data", "eda", "train", "survival", "target", "themes"]
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -107,6 +118,7 @@ def main(argv: list[str] | None = None) -> None:
         "train": lambda: cmd_train(cfg),
         "survival": lambda: cmd_survival(cfg),
         "target": lambda: cmd_target(cfg),
+        "themes": lambda: cmd_themes(cfg),
     }
     for name in STEPS if args.step == "all" else [args.step]:
         steps[name]()

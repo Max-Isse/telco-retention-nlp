@@ -91,3 +91,42 @@ targeting:
     power: 0.80
     save_rates: [0.05, 0.10, 0.20, 0.30]  # true relative reduction in churn among treated to detect
 
+nlp:
+  # Phase 5-6 (D-018 to D-020). Kaggle `thoughtvector/customer-support-on-twitter` (real public tweets).
+  source_zip: data/raw/twitter/twcs/twcs.csv.zip
+  brands:                           # US phone / internet providers' support accounts (match IBM's US customer base)
+    TMobileHelp: T-Mobile
+    sprintcare: Sprint
+    VerizonSupport: Verizon
+    ATT: AT&T
+    comcastcares: Comcast (Xfinity)
+    Ask_Spectrum: Spectrum
+    CoxHelp: Cox
+    CenturyLinkHelp: CenturyLink
+  min_words: 4                      # cleaned customer tweets shorter than this are dropped (greetings, handles only)
+  embedding_model: sentence-transformers/all-MiniLM-L6-v2
+  cluster_k: [8, 10, 12, 14, 16, 18, 20]  # candidate numbers of themes; chosen by silhouette on a sample
+  silhouette_sample: 8000
+  k: 20                             # silhouette is flat (0.026-0.029 for k = 8..20): over-cluster, then merge by reading
+  theme_labels:                     # cluster -> theme, assigned by reading terms, 7 central and 5 random tweets per cluster
+    0: Support follow-up and account access
+    1: General dissatisfaction
+    3: General dissatisfaction
+    12: General dissatisfaction
+    14: General dissatisfaction
+    18: General dissatisfaction
+    2: Internet speed below plan
+    4: Internet outage
+    11: Internet outage
+    13: Internet outage
+    5: Unreliable internet (recurring drops)
+    6: Mobile service, calls and phone orders
+    7: Wi-Fi and router
+    8: Price increases, plans and promotions
+    9: New phone launch and pre-orders
+    10: Poor customer service
+    15: "TV: channels, box and DVR"
+    19: "TV: channels, box and DVR"
+    16: Coverage, signal and network
+    17: Billing errors and disputed charges
+

@@ -14,9 +14,11 @@
 
 ## Customer Support on Twitter (phase 5)
 
-Kaggle dataset `thoughtvector/customer-support-on-twitter` (real public tweets to and from brands' support accounts),
-downloaded with the Kaggle CLI to `raw/twitter/` (`twcs.csv`, 517 MB). The filter to telecom brands and the resulting
-volumes will be documented here in phase 5.
+Kaggle dataset `thoughtvector/customer-support-on-twitter` (real public tweets to and from brands' support accounts;
+2,811,774 tweets), downloaded with the Kaggle CLI to `raw/twitter/` and cached as Parquet. Filter (D-018): opening
+customer tweets whose first reply came from one of 8 US telecom support accounts, cleaned and de-duplicated: 83,138
+tweets, almost all from October to early December 2017 (`processed/telecom_tweets.parquet`; volumes and steps in
+`reports/themes.md`).
 
 ## Synthetic data
 

@@ -118,3 +118,23 @@ config (contract upgrade, first-year welcome, fibre check, security bundle, auto
 rate is an assumption; the report sizes a randomised treatment/control test (two-proportion z-test) and recommends a
 permanent holdout and an uplift model once test data exist.
 **Why:** without treatment data, uplift cannot be estimated; offer–driver matching is a hypothesis to test, not a result.
+
+## D-018 Support text: US telecom brands, opening tweets paired with the brand's first reply
+**Choice:** from the 2.81M tweets, keep customer tweets that open a conversation (not a reply to anything) and whose
+first reply came from one of 8 US phone/internet support accounts (T-Mobile, Sprint, Verizon, AT&T, Comcast,
+Spectrum, Cox, CenturyLink), paired with that reply; clean handles, URLs, emoji and HTML; drop texts under 4 words and
+exact duplicates: 83,138 tweets. Non-US telecoms in the data (O2, Safaricom, Idea, Airtel, Glo) are excluded.
+**Why:** IBM's customer base is a US phone-and-internet provider, so US carriers and cable/internet companies are the
+closest match in services and language; opening tweets state the problem before the conversation turns into
+logistics (DMs, account numbers).
+**Time range:** almost all tweets are from October to early December 2017 (a 9-week window); phase 6 uses October for
+training and November onwards as the out-of-time test.
+
+## D-019 Themes: over-cluster sentence embeddings, then merge clusters by reading
+**Choice:** all-MiniLM-L6-v2 sentence embeddings, k-means with k = 20, class-based TF-IDF terms per cluster, then a
+person reads the terms, the 7 tweets nearest each centre and 5 random members, and assigns each cluster to a theme
+(13 themes; `nlp.theme_labels`). Brand-named rants and generic venting form one "general dissatisfaction" theme.
+**Why:** the silhouette score is flat and very low for every k from 8 to 20 (0.026–0.029), so no k is statistically
+preferred and short texts do not form crisp clusters; reading is the real validation, and phase 6 checks the themes
+against a hand-labelled sample. BERTopic would add UMAP and HDBSCAN on top of the same embeddings; k-means with
+c-TF-IDF gives the same kind of output with fewer moving parts.
