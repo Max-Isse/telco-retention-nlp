@@ -80,6 +80,20 @@ By internet service:
 | Fiber optic        |        2487 |       1032 |        0.415 |              0.814 |             0.728 |             0.415 |              0.820 |             0.746 |             0.410 |
 | No                 |        1212 |         93 |        0.077 |              0.842 |             0.265 |             0.077 |              0.854 |             0.321 |             0.083 |
 
+By gender:
+
+| gender   |   customers |   churners |   churn_rate |   logistic_roc_auc |   logistic_pr_auc |   logistic_mean_p |   lightgbm_roc_auc |   lightgbm_pr_auc |   lightgbm_mean_p |
+|:---------|------------:|-----------:|-------------:|-------------------:|------------------:|------------------:|-------------------:|------------------:|------------------:|
+| Female   |        2744 |        734 |        0.267 |              0.862 |             0.670 |             0.268 |              0.863 |             0.692 |             0.267 |
+| Male     |        2890 |        761 |        0.263 |              0.849 |             0.665 |             0.263 |              0.857 |             0.674 |             0.264 |
+
+By senior citizen:
+
+|   senior_citizen |   customers |   churners |   churn_rate |   logistic_roc_auc |   logistic_pr_auc |   logistic_mean_p |   lightgbm_roc_auc |   lightgbm_pr_auc |   lightgbm_mean_p |
+|-----------------:|------------:|-----------:|-------------:|-------------------:|------------------:|------------------:|-------------------:|------------------:|------------------:|
+|                0 |        4693 |       1098 |        0.234 |              0.859 |             0.651 |             0.234 |              0.865 |             0.666 |             0.235 |
+|                1 |         941 |        397 |        0.422 |              0.798 |             0.714 |             0.422 |              0.801 |             0.725 |             0.417 |
+
 ## 4. Logistic regression: odds ratios (unpenalised, training part)
 
 Pseudo-R² 0.306. Odds ratios > 1 raise churn odds. Tenure and monthly

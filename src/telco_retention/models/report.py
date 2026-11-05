@@ -78,7 +78,7 @@ def evaluate_all(res: TrainResult, cfg: Config) -> dict[str, Any]:
     seg_df = add_segments(tr, cfg)
     segs = {
         by: segment_table(seg_df, by, {"logistic": "p_logistic_cal", "lightgbm": "p_lightgbm_cal"})
-        for by in ("contract", "tenure_band", "internet_service")
+        for by in ("contract", "tenure_band", "internet_service", "gender", "senior_citizen")
     }
     calib = pd.concat(
         [

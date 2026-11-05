@@ -32,3 +32,28 @@ Generated each run: `reports/tables/lineage.csv` and `reports/tables/leakage_aud
 
 Generated each run: `reports/tables/nlp_lineage.csv`.
 
+## Labels and served models
+
+| Artifact | Built from | Step | Decision |
+|---|---|---|---|
+| `data/labels/label_sample_ids.csv` | 700 October + 300 November-onwards opening tweets, drawn at random once with the sizes in `nlp.label_sample` | committed; the ids file is the record | D-020 |
+| `data/labels/llm_labels.csv` | the 1,000 sampled tweets, labelled by an LLM with `docs/labelling_guide.md` | | D-020 |
+| `data/labels/human_labels.csv` | 200 of them (100 per period), labelled by hand, without the LLM labels | `telco import-labels` | D-020 |
+| `artifacts/churn_model.joblib` (git-ignored) | `customers.parquet`, stratified 80% training part | `telco train` | D-009, D-010 |
+| `artifacts/ticket_models.joblib` (git-ignored) | the 1,000 LLM labels and the tweets' cleaned text | `telco package-tickets` | D-024 |
+
+Label files hold tweet ids and labels only; tweet text stays in `data/processed/` (git-ignored).
+
+## Scoring
+
+```
+customers.parquet (churn = 0: 5,174 active customers) or a file in IBM's columns (--input)
+  └─ prepare (same typing as clean) → design matrix → churn_model.joblib → calibrated p
+       └─ value at risk (CLTV, else charges x margin x horizon) → expected value → contact list    telco score
+            ├─ outputs/contact_list.csv, outputs/score_run.json (input hash, model, assumptions; git-ignored)
+            └─ reports/scoring.md
+```
+
+The scheduled workflow (`.github/workflows/score.yml`) runs `fetch → data → train → score` weekly on the pinned
+data and keeps the outputs as a 14-day workflow artifact (D-025).
+
