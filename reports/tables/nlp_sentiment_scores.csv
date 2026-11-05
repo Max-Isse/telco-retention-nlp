@@ -1,0 +1,3 @@
+model,macro_f1,accuracy,neg_recall
+embeddings + logistic (trained on October),0.6081880169908339,0.8,0.8251121076233184
+off-the-shelf cardiffnlp/twitter-roberta-base-sentiment-latest,0.6213167045781369,0.7866666666666666,0.8878923766816144

@@ -6,8 +6,8 @@ Customer-retention analytics on two public data sets that are deliberately **not
 - **Customer Support on Twitter** (telecom brands): which complaint themes drive dissatisfaction, connected to churn
   drivers at the level of themes and service types (D-001).
 
-**Status:** phases 0–5 of 8 complete (data, leakage audit, EDA, churn models, survival, retention targeting,
-support-text themes). See [docs/phase_plan.md](docs/phase_plan.md).
+**Status:** phases 0–6 of 8 complete (data, leakage audit, EDA, churn models, survival, retention targeting,
+support-text themes, classifiers and churn drivers). See [docs/phase_plan.md](docs/phase_plan.md).
 
 ## How to run
 
@@ -31,7 +31,9 @@ uv run pytest
   and writes [reports/churn_models.md](reports/churn_models.md); `survival` writes Kaplan-Meier, Cox and
   remaining-lifetime results to [reports/survival.md](reports/survival.md); `target` compares targeting policies
   at the budget, with sensitivity, messages and the uplift test design ([reports/targeting.md](reports/targeting.md));
-  `themes` filters the Twitter support data to US telecoms and finds complaint themes ([reports/themes.md](reports/themes.md)).
+  `themes` filters the Twitter support data to US telecoms and finds complaint themes ([reports/themes.md](reports/themes.md));
+  `classify` trains theme, sentiment and urgency classifiers out of time and links themes to churn drivers
+  ([reports/nlp_classifiers.md](reports/nlp_classifiers.md), [reports/themes_to_churn.md](reports/themes_to_churn.md)).
 - The `nlp` extra (sentence embeddings, CPU torch) is needed only for `themes`; CI installs the core only.
 - Every path, seed and business assumption is in [configs/config.yaml](configs/config.yaml).
 
@@ -39,7 +41,7 @@ uv run pytest
 
 | Path | Contents |
 |---|---|
-| `src/telco_retention/` | `data/` (fetch, clean, contract, leakage audit), `eda.py`, `models/` (design, training, evaluation, SHAP), `survival.py`, `targeting.py`, `nlp/` (tweets, themes), `cli.py` |
+| `src/telco_retention/` | `data/` (fetch, clean, contract, leakage audit), `eda.py`, `models/` (design, training, evaluation, SHAP), `survival.py`, `targeting.py`, `nlp/` (tweets, themes, classifiers, insight), `cli.py` |
 | `configs/` | config and assumptions |
 | `docs/` | standards, business case, methodology, phase plan, decisions, lineage |
 | `reports/` | generated reports, tables and figures |

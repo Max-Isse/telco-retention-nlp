@@ -100,12 +100,65 @@ def cmd_themes(cfg: Config) -> None:
     log.info("themes: k=%s; report %s", th["k"], write_themes_report(res.tweets, res.steps, th, cfg))
 
 
-STEPS = ["fetch", "data", "eda", "train", "survival", "target", "themes"]
+def cmd_import_labels(cfg: Config) -> None:
+    """Validate the hand-labelled CSV and keep ids + labels only (the text stays out of git)."""
+    src = cfg.path("raw_dir").parent / "labels" / "human_to_label.csv"
+    df = pd.read_csv(src, encoding="utf-8-sig", dtype=str).fillna("")
+    for col in ("theme_code", "sentiment", "urgency"):
+        df[col] = df[col].str.strip().str.lower()
+    bad = df[
+        ~df.theme_code.isin([str(i) for i in range(1, 15)])
+        | ~df.sentiment.isin(["neg", "neu", "pos"])
+        | ~df.urgency.isin(["high", "normal"])
+    ]
+    if len(bad):
+        raise SystemExit(f"{len(bad)} rows incomplete or invalid, first rows: {bad.row.head(10).tolist()}")
+    out = df[["row", "tweet_id", "theme_code", "sentiment", "urgency", "notes"]].assign(labeller="human")
+    out["theme_code"] = out.theme_code.astype(int)
+    out["tweet_id"] = out.tweet_id.astype("int64")
+    path = src.parent / "human_labels.csv"
+    out.to_csv(path, index=False)
+    log.info("imported %s human labels to %s", len(out), path)
+
+
+def cmd_classify(cfg: Config) -> None:
+    from telco_retention.nlp.classify import agreement, labelled_frame, run_classifiers
+    from telco_retention.nlp.insight import driver_table, predict_all, weekly_volumes, write_reports
+    from telco_retention.nlp.themes import cached_embeddings, save_path
+
+    tweets = pd.read_parquet(cfg.path("processed_dir") / "telecom_tweets.parquet")
+    x = cached_embeddings(tweets, cfg)
+    labels_dir = cfg.path("raw_dir").parent / "labels"
+    df, xl = labelled_frame(cfg, tweets, x, labels_dir / "llm_labels.csv")
+    themes = pd.read_parquet(save_path(cfg))[["tweet_id", "theme"]]
+    cluster_theme = df[["tweet_id"]].merge(themes, on="tweet_id", how="left")["theme"]
+    res = run_classifiers(df, xl, cluster_theme, cfg)
+    human_path = labels_dir / "human_labels.csv"
+    agree = human_eval = None
+    if human_path.exists():
+        from telco_retention.nlp.classify import evaluate_on_human
+
+        human = pd.read_csv(human_path)
+        from telco_retention.nlp.classify import label_bias
+
+        llm_cols = df[["tweet_id", "theme_code", "sentiment", "urgency"]]
+        agree = agreement(human, llm_cols)
+        agree.attrs["bias"] = label_bias(human, llm_cols)
+        human_eval = evaluate_on_human(res, human, tweets, x, cfg)
+    pred = predict_all(res, tweets, x)
+    customers = pd.read_parquet(cfg.path("processed_dir") / "customers.parquet")
+    paths = write_reports(
+        res, pred, weekly_volumes(pred, cfg), driver_table(pred, customers, cfg), agree, human_eval, cfg
+    )
+    log.info("classifiers: best %s; reports %s", res.meta["best_theme_model"], [str(p) for p in paths])
+
+
+STEPS = ["fetch", "data", "eda", "train", "survival", "target", "themes", "classify"]
 
 
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(prog="telco", description=__doc__)
-    parser.add_argument("step", choices=[*STEPS, "all"])
+    parser.add_argument("step", choices=[*STEPS, "all", "import-labels"])
     parser.add_argument("--config", default=None)
     parser.add_argument("--force", action="store_true", help="fetch: download again")
     args = parser.parse_args(argv)
@@ -119,6 +172,8 @@ def main(argv: list[str] | None = None) -> None:
         "survival": lambda: cmd_survival(cfg),
         "target": lambda: cmd_target(cfg),
         "themes": lambda: cmd_themes(cfg),
+        "classify": lambda: cmd_classify(cfg),
+        "import-labels": lambda: cmd_import_labels(cfg),
     }
     for name in STEPS if args.step == "all" else [args.step]:
         steps[name]()

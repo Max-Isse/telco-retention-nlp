@@ -11,3 +11,4 @@ artifacts/
 mlruns/
 desktop.ini
 Thumbs.db
+data/labels/*_to_label.csv

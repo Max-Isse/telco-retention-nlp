@@ -129,4 +129,51 @@ nlp:
     19: "TV: channels, box and DVR"
     16: Coverage, signal and network
     17: Billing errors and disputed charges
+  labels:                           # phase 6 (D-020): taxonomy codes used by both labellers
+    1: Internet outage
+    2: Unreliable internet (recurring drops)
+    3: Internet speed below plan
+    4: Wi-Fi and router
+    5: "TV: channels, box and DVR"
+    6: Mobile service, calls and phone orders
+    7: Coverage, signal and network
+    8: New phone launch and pre-orders
+    9: Billing errors and disputed charges
+    10: Price increases, plans and promotions
+    11: Poor customer service
+    12: Support follow-up and account access
+    13: General dissatisfaction
+    14: Other (not a complaint, unclear, off-topic)
+  label_sample: {train_month: "2017-10", train_n: 700, test_n: 300, human_per_period: 100}
+  drivers:                          # theme codes and IBM churn reasons grouped into shared churn drivers (D-022)
+    Reliability (outages, drops, Wi-Fi, coverage):
+      themes: [1, 2, 4, 7]
+      churn_reasons: [Network reliability]
+      telco_feature: {column: internet_service, value: Fiber optic}
+    Speed:
+      themes: [3]
+      churn_reasons: [Competitor offered higher download speeds, Lack of affordable download/upload speed]
+      telco_feature: {column: internet_service, value: Fiber optic}
+    Price, plans and billing:
+      themes: [9, 10]
+      churn_reasons: [Price too high, Competitor made better offer, Competitor offered more data, Extra data charges, Long distance charges]
+      telco_feature: {column: payment_method, value: Electronic check}
+    Customer service and support access:
+      themes: [11, 12]
+      churn_reasons: [Attitude of support person, Attitude of service provider, Poor expertise of phone support, Poor expertise of online support, Lack of self-service on Website]
+      telco_feature: {column: tech_support, value: "No"}
+    Devices and phone service:
+      themes: [6, 8]
+      churn_reasons: [Competitor had better devices]
+      telco_feature: {column: phone_service, value: 1}
+    TV and range of services:
+      themes: [5]
+      churn_reasons: [Limited range of services]
+      telco_feature: {column: streaming_tv, value: "Yes"}
+    General dissatisfaction:
+      themes: [13]
+      churn_reasons: [Product dissatisfaction, Service dissatisfaction]
+    Not addressable / other:
+      themes: [14]
+      churn_reasons: ["Don't know", Moved, Deceased]
 

@@ -1,9 +1,11 @@
 # Methodology
 
 Sections 1–2 cover the churn data and models (phases 1–2), section 3 survival (phase 3), section 4 targeting
-(phase 4), section 5 support-text themes (phase 5).
+(phase 4), section 5 support-text themes (phase 5),
+section 6 classifiers and churn drivers (phase 6).
 Results: [reports/eda.md](../reports/eda.md), [reports/churn_models.md](../reports/churn_models.md),
-[reports/survival.md](../reports/survival.md), [reports/targeting.md](../reports/targeting.md), [reports/themes.md](../reports/themes.md).
+[reports/survival.md](../reports/survival.md), [reports/targeting.md](../reports/targeting.md), [reports/themes.md](../reports/themes.md),
+[reports/nlp_classifiers.md](../reports/nlp_classifiers.md), [reports/themes_to_churn.md](../reports/themes_to_churn.md).
 
 ## 1. Data and unit of analysis
 
@@ -83,4 +85,22 @@ Results: [reports/eda.md](../reports/eda.md), [reports/churn_models.md](../repor
 - **Where it can fail:** a large share (23%) is generic venting with no service named; event-driven themes (the iPhone X
   launch) are specific to the time window; Twitter users are not a random sample of customers, so theme volumes show
   what is said publicly, not the true mix of problems.
+
+## 6. Classifiers, sentiment, urgency and churn drivers
+
+- **Labels (D-020):** 1,000 tweets labelled by an LLM with a written guide; 200 also labelled by hand to measure the
+  LLM labels' agreement (Cohen's kappa) and to score the classifiers against human judgement. Result: kappa 0.65
+  (themes), 0.50 (sentiment), 0.65 (urgency); the LLM labels lean negative and under-flag urgency, so the
+  hand-label scores are the ones quoted.
+- **Validation:** out-of-time: October trains, November onwards tests; bootstrap CI on macro-F1; per-class metrics and a
+  confusion matrix. Macro-F1 is used because the 14 classes are imbalanced (Wi-Fi has 3 test tweets).
+- **Models (D-021):** TF-IDF + logistic regression (baseline) and sentence embeddings + logistic regression for themes;
+  embeddings + logistic regression for sentiment and urgency, compared with an off-the-shelf Twitter sentiment model and
+  a keyword rule.
+- **Assumptions:** the guide's categories are mutually exclusive enough to label one main theme; October's language
+  carries over to November (checked by the out-of-time split). Event-driven classes (new phone launches) shift between
+  periods.
+- **Churn drivers (D-022):** themes and IBM churn reasons grouped into shared drivers; compared as shares, not linked.
+- **Where it can fail:** LLM labels may share the LLM's blind spots (hence the human sample); small classes have wide
+  per-class uncertainty; sarcasm and understatement remain hard for both the trained and the off-the-shelf models.
 

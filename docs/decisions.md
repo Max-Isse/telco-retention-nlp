@@ -138,3 +138,38 @@ person reads the terms, the 7 tweets nearest each centre and 5 random members, a
 preferred and short texts do not form crisp clusters; reading is the real validation, and phase 6 checks the themes
 against a hand-labelled sample. BERTopic would add UMAP and HDBSCAN on top of the same embeddings; k-means with
 c-TF-IDF gives the same kind of output with fewer moving parts.
+
+## D-020 Labels: 1,000 LLM-labelled tweets, 200 also hand-labelled, one written guide
+**Choice:** a random sample of 1,000 opening tweets (700 from October, 300 from November onwards) is labelled by an LLM
+(Claude) with `docs/labelling_guide.md`: 14 themes (the 13 phase 5 themes plus "Other"), sentiment
+(neg/neu/pos) and urgency (high/normal). 200 of them (100 per period, shuffled, without the LLM labels) are labelled by
+hand with the same guide; agreement is reported as raw agreement and Cohen's kappa, and every classifier is also
+scored against the hand labels. Label files keep tweet ids and labels only; tweet text stays out of git.
+**Why:** the brief asks for hand labels and, where an LLM labels more, measured agreement. LLM labels are presented as
+LLM labels throughout, never as hand labels.
+**Result:** human vs LLM on the 200 tweets: themes 68% agreement, kappa 0.65 (substantial); sentiment 77%, kappa 0.50
+(moderate); urgency 87%, kappa 0.65 (substantial). The LLM leans negative (18% of tweets human-neutral but
+LLM-negative, 5% the reverse) and under-flags urgency (9.5% human-urgent but LLM-normal, 3.5% the reverse); theme
+disagreements are scattered, mostly between neighbouring themes (outage vs recurring drops, general dissatisfaction vs
+customer service). Against the hand labels: themes macro-F1 0.49 (100 test-period tweets), trained sentiment 0.68,
+off-the-shelf sentiment 0.62, urgency 0.73.
+
+## D-021 Classifiers and sentiment: out-of-time split, embeddings vs TF-IDF, off-the-shelf comparison
+**Choice:** train on October, test on November onwards (the support data has timestamps, so the split is out-of-time;
+the iPhone X launch falls in the test period). Themes: majority class, TF-IDF + logistic regression, sentence
+embeddings + logistic regression (class-balanced). Sentiment: embeddings + logistic regression against the
+off-the-shelf `cardiffnlp/twitter-roberta-base-sentiment-latest`; every disagreement of the off-the-shelf model on the
+test period is read and categorised (`data/labels/sentiment_failure_review.csv`). Urgency: embeddings + logistic
+regression against a keyword rule.
+**Result:** embeddings beat TF-IDF on themes (macro-F1 0.58 vs 0.44 out of time); the off-the-shelf model ties with
+the trained one on sentiment (0.62 vs 0.61). Its disagreements are mostly a definition difference (factual outage
+reports scored negative) plus true failures on sarcasm, understatement and telecom jargon.
+**Note:** the cached off-the-shelf weights are loaded locally; the hub's safetensors-conversion lookup hung once.
+
+## D-022 Themes meet churn only through shared drivers
+**Choice:** themes and IBM's churn reasons are grouped into eight drivers in config (reliability, speed, price/plans/
+billing, customer service and support access, devices, TV, general dissatisfaction, not addressable); the report shows
+the tweet share, the churn-reason share and IBM's churn rate with and without a related service feature.
+**Why:** the datasets share no customer key (D-001); a driver-level comparison is the honest link.
+**Caveat:** shares are not comparable as rates: tweets over-represent acute, visible failures; churn reasons are what a
+leaving customer picked from a list.
